@@ -1,0 +1,24 @@
+# RABBIT_MQ_SERVERS=amqp://localhost:5672
+RABBIT_MQ_SERVERS=amqps://fxxxhxhv:yDukA4xXKODRor3z6qiZ1w0MQj4NX0XF@beaver.rmq.cloudamqp.com/fxxxhxhv
+RABBIT_MQ_TOPIC=user
+
+# DATABASE_URL=postgresql://postgres:postgres@localhost:5432/auth?schema=public
+DATABASE_URL=postgres://qazdrpxnxilcst:60e81e359c3178b67a044c15525510869e1565da7ba25414df4e5a22d480452b@ec2-54-197-100-79.compute-1.amazonaws.com:5432/d1u5vkj5ii86v5
+
+
+
+# LDAP_SERVER=ldap://localhost
+# LDAP_SEARCH_BASE=ou=usuarios,dc=cmc,dc=pr,dc=gov,dc=br
+# LDAP_BIND_BASE=dc=cmc,dc=pr,dc=gov,dc=br
+# LDAP_BIND_PREFIX=cn
+# LDAP_SEARCH_USER=authproxy
+# LDAP_SEARCH_PASS=authproxy
+
+LDAP_SERVER=ldap://ldap.jumpcloud.com:389
+LDAP_SEARCH_BASE=ou=Users,o=60d392480936177b91b234e5,dc=jumpcloud,dc=com
+LDAP_BIND_BASE=ou=Users,o=60d392480936177b91b234e5,dc=jumpcloud,dc=com
+LDAP_BIND_PREFIX=uid
+LDAP_SEARCH_USER=userbind
+LDAP_SEARCH_PASS=userbind
+
+JWT_SECRET=fdh6FgGFK$GG%!Ff678534FGgdsonn$$Asdf@$%%
