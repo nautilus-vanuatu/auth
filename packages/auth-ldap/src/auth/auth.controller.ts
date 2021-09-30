@@ -13,6 +13,12 @@ import { AuthService } from './auth.service';
 import { Credentials } from './interfaces/credentials.interface';
 import { UserLdap } from './interfaces/user-ldap.interface';
 import { UserToken } from './interfaces/user-token.interface';
+import {
+  MSG_AUTHENTICATE,
+  MSG_VALIDATE,
+  ERR_AUTHENTICATE,
+  ERR_VALIDATE,
+} from './constants';
 
 @Controller('auth')
 export class AuthController {
@@ -24,7 +30,7 @@ export class AuthController {
     private readonly jwtService: JwtService
   ) {}
 
-  @MessagePattern('authenticate')
+  @MessagePattern(MSG_AUTHENTICATE)
   async authenticate(
     @Payload() credentials: Credentials,
     @Ctx() context: RmqContext
@@ -68,13 +74,13 @@ export class AuthController {
         access_token: this.jwtService.sign(payload),
       };
     } catch (err) {
-      throw new RpcException('Error on authenticate user');
+      throw new RpcException(ERR_AUTHENTICATE);
     } finally {
       await channel.ack(originalMsg);
     }
   }
 
-  @MessagePattern('validate')
+  @MessagePattern(MSG_VALIDATE)
   async validate(
     @Payload() token: string,
     @Ctx() context: RmqContext
@@ -87,7 +93,7 @@ export class AuthController {
 
       return tokenValid;
     } catch (err) {
-      throw new RpcException('Error on validating user');
+      throw new RpcException(ERR_VALIDATE);
     } finally {
       await channel.ack(originalMsg);
     }

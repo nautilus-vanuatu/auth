@@ -6,6 +6,7 @@ import {
   RmqContext,
 } from '@nestjs/microservices';
 import { UserService } from './user.service';
+import { MSG_SEARCH } from './constants';
 
 @Controller('user')
 export class UserController {
@@ -13,7 +14,7 @@ export class UserController {
 
   constructor(private readonly userService: UserService) {}
 
-  @MessagePattern('search-user')
+  @MessagePattern(MSG_SEARCH)
   async getUserById(
     @Payload() idUsuario: string,
     @Ctx() context: RmqContext
