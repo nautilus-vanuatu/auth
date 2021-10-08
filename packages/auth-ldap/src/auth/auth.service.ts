@@ -2,19 +2,67 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RpcException } from '@nestjs/microservices';
 import { JwtService } from '@nestjs/jwt';
-import LdapClient from 'ldapjs-client';
+import * as LdapClient from 'ldapjs-client';
+
+import { User } from '.prisma/client';
+import { UserService } from '../user/user.service';
 import { Credentials } from './interfaces/credentials.interface';
 import { UserLdap } from './interfaces/user-ldap.interface';
+import { ERR_AUTHENTICATE, ERR_VALIDATE } from './constants';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly userService: UserService
+  ) {}
 
   private readonly logger = new Logger(AuthService.name);
 
   private readonly configService = new ConfigService();
 
-  async getLDAPUser(credentials: Credentials): Promise<any> {
+  async authenticate(credentials: Credentials): Promise<any> {
+    try {
+      const user: UserLdap = await this.getLDAPUser(credentials);
+
+      const userBd = await this.userService.getUserByUsername(user.uid);
+
+      let updatedUser: User;
+
+      if (userBd) {
+        updatedUser = await this.userService.updateUser({
+          where: { username: user.uid },
+          data: {
+            username: user.uid,
+            email: user.mail,
+            name: user.givenName,
+            surname: user.sn,
+          },
+        });
+      } else {
+        updatedUser = await this.userService.createUser({
+          username: user.uid,
+          email: user.mail,
+          name: user.givenName,
+          surname: user.sn,
+        });
+      }
+
+      const payload = {
+        username: updatedUser.username,
+        id: updatedUser.id,
+      };
+
+      return {
+        user: updatedUser,
+        access_token: this.jwtService.sign(payload),
+      };
+    } catch (err) {
+      throw new RpcException(ERR_AUTHENTICATE);
+    }
+  }
+
+  private async getLDAPUser(credentials: Credentials): Promise<any> {
     this.logger.log(`credentials: ${JSON.stringify(credentials)}`);
 
     const { username, password } = credentials;
@@ -37,7 +85,7 @@ export class AuthService {
       return true;
     } catch (err) {
       this.logger.error(`Token validation error: ${err}`);
-      return false;
+      throw new RpcException(ERR_VALIDATE);
     }
   }
 
